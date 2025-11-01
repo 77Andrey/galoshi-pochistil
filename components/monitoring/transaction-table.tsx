@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { useRouter, usePathname } from "next/navigation"
 import { useVirtualizer } from "@tanstack/react-virtual"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -43,8 +42,6 @@ function getStatusBadgeColor(status: TransactionStatus): string {
 }
 
 export function TransactionTable({ transactions }: TransactionTableProps) {
-  const router = useRouter()
-  const pathname = usePathname()
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [riskFilter, setRiskFilter] = useState<string>("all")
@@ -69,12 +66,14 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
       if (searchQuery) params.set("search", searchQuery)
       if (statusFilter !== "all") params.set("status", statusFilter)
       if (riskFilter !== "all") params.set("risk", riskFilter)
-      const newUrl = `${pathname}${params.toString() ? `?${params.toString()}` : ""}`
-      if (window.location.href !== `${window.location.origin}${newUrl}`) {
-        router.replace(newUrl)
+      const newUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ""}`
+      if (window.location.search !== `?${params.toString()}` && params.toString() !== "") {
+        window.history.replaceState({}, "", newUrl)
+      } else if (params.toString() === "" && window.location.search !== "") {
+        window.history.replaceState({}, "", window.location.pathname)
       }
     }
-  }, [searchQuery, statusFilter, riskFilter, pathname, router])
+  }, [searchQuery, statusFilter, riskFilter])
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter((transaction) => {
