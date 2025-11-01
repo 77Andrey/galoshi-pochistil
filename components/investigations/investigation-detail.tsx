@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import type { Investigation } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { useLanguage } from "@/components/language-provider"
 import { UserIcon, CalendarIcon, ClockIcon, CheckIcon, XIcon, UserPlusIcon } from "lucide-react"
 
 interface InvestigationDetailProps {
@@ -64,6 +65,7 @@ const investigationTemplates = {
 }
 
 export function InvestigationDetail({ investigation, onClose }: InvestigationDetailProps) {
+  const { t } = useLanguage()
   const [tasks, setTasks] = useState<Task[]>(
     investigationTemplates[investigation.type as keyof typeof investigationTemplates]?.map(
       (desc, idx) => ({
@@ -154,67 +156,67 @@ export function InvestigationDetail({ investigation, onClose }: InvestigationDet
           </div>
           <p className="text-sm text-muted-foreground font-mono">{investigation.id}</p>
         </div>
-        <Button variant="ghost" size="sm" onClick={onClose}>
-          <XIcon className="h-4 w-4 mr-2" />
-          Close
-        </Button>
-      </div>
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <XIcon className="h-4 w-4 mr-2" />
+              {t.investigations.close}
+            </Button>
+          </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Profile</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <UserIcon className="h-4 w-4" />
-                <span>{investigation.profileName}</span>
-              </div>
-              <div className="text-xs font-mono text-muted-foreground">
-                {investigation.profileId}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">{t.investigations.profile}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <UserIcon className="h-4 w-4" />
+                    <span>{investigation.profileName}</span>
+                  </div>
+                  <div className="text-xs font-mono text-muted-foreground">
+                    {investigation.profileId}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Timeline</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <CalendarIcon className="h-4 w-4" />
-                <span className="text-xs">Created {investigation.createdAt.toLocaleDateString()}</span>
-              </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <ClockIcon className="h-4 w-4" />
-                <span className="text-xs">Updated {investigation.updatedAt.toLocaleDateString()}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">{t.investigations.timeline}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <CalendarIcon className="h-4 w-4" />
+                    <span className="text-xs">{t.investigations.created} {investigation.createdAt.toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <ClockIcon className="h-4 w-4" />
+                    <span className="text-xs">{t.investigations.updated} {investigation.updatedAt.toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Assigned To</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <UserPlusIcon className="h-4 w-4" />
-                <span>{investigation.assignee}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">{t.investigations.assignedTo}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <UserPlusIcon className="h-4 w-4" />
+                    <span>{investigation.assignee}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Description</CardTitle>
-        </CardHeader>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t.investigations.description}</CardTitle>
+            </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">{investigation.description}</p>
         </CardContent>
@@ -222,7 +224,7 @@ export function InvestigationDetail({ investigation, onClose }: InvestigationDet
 
       <Card>
         <CardHeader>
-          <CardTitle>Task Checklist</CardTitle>
+          <CardTitle>{t.investigations.taskChecklist}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
@@ -258,7 +260,7 @@ export function InvestigationDetail({ investigation, onClose }: InvestigationDet
 
       <Card>
         <CardHeader>
-          <CardTitle>Comments & Activity</CardTitle>
+          <CardTitle>{t.investigations.commentsActivity}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -295,13 +297,13 @@ export function InvestigationDetail({ investigation, onClose }: InvestigationDet
             ))}
             <div className="border-t border-border pt-4 space-y-2">
               <Textarea
-                placeholder="Add a comment... Use @username to mention colleagues"
+                placeholder={t.investigations.addCommentPlaceholder}
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 className="min-h-[80px]"
               />
               <Button size="sm" onClick={handleCommentAdd}>
-                Add Comment
+                {t.investigations.addComment}
               </Button>
             </div>
           </div>

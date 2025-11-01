@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button"
 import { useMockInvestigations } from "@/lib/mock-data"
 import type { Investigation } from "@/lib/types"
+import { useLanguage } from "@/components/language-provider"
 import { SearchIcon, FilterIcon, PlusIcon } from "lucide-react"
 
 export default function InvestigationsPage() {
@@ -16,6 +17,7 @@ export default function InvestigationsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [priorityFilter, setPriorityFilter] = useState<string>("all")
   const [selectedInvestigation, setSelectedInvestigation] = useState<Investigation | null>(null)
+  const { t } = useLanguage()
 
   useEffect(() => {
     setInvestigations(useMockInvestigations())
@@ -38,12 +40,12 @@ export default function InvestigationsPage() {
     <div className="flex flex-col gap-6 p-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Investigations</h1>
-          <p className="text-muted-foreground mt-1">Track and manage compliance investigations</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t.investigations.title}</h1>
+          <p className="text-muted-foreground mt-1">{t.investigations.subtitle}</p>
         </div>
         <Button>
           <PlusIcon className="mr-2 h-4 w-4" />
-          New Investigation
+          {t.investigations.newInvestigation}
         </Button>
       </div>
 
@@ -51,7 +53,7 @@ export default function InvestigationsPage() {
         <div className="relative flex-1">
           <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search by ID, profile, or type..."
+            placeholder={t.investigations.searchPlaceholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
@@ -61,26 +63,26 @@ export default function InvestigationsPage() {
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[140px]">
               <FilterIcon className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder={t.investigations.status} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="open">Open</SelectItem>
-              <SelectItem value="in-progress">In Progress</SelectItem>
-              <SelectItem value="closed">Closed</SelectItem>
+              <SelectItem value="all">{t.investigations.allStatus}</SelectItem>
+              <SelectItem value="open">{t.investigations.open}</SelectItem>
+              <SelectItem value="in-progress">{t.investigations.inProgress}</SelectItem>
+              <SelectItem value="closed">{t.investigations.closed}</SelectItem>
             </SelectContent>
           </Select>
           <Select value={priorityFilter} onValueChange={setPriorityFilter}>
             <SelectTrigger className="w-[140px]">
               <FilterIcon className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Priority" />
+              <SelectValue placeholder={t.investigations.priority} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Priority</SelectItem>
-              <SelectItem value="low">Low</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="critical">Critical</SelectItem>
+              <SelectItem value="all">{t.investigations.allPriority}</SelectItem>
+              <SelectItem value="low">{t.risk.low}</SelectItem>
+              <SelectItem value="medium">{t.risk.medium}</SelectItem>
+              <SelectItem value="high">{t.risk.high}</SelectItem>
+              <SelectItem value="critical">{t.risk.critical}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -88,7 +90,7 @@ export default function InvestigationsPage() {
 
       {!selectedInvestigation && (
         <div className="text-sm text-muted-foreground">
-          Showing {filteredInvestigations.length} of {investigations.length} investigations
+          {t.investigations.showing} {filteredInvestigations.length} {t.investigations.of} {investigations.length} {t.investigations.investigations}
         </div>
       )}
 

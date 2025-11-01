@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SearchIcon, FilterIcon, DownloadIcon, FileJsonIcon, CheckSquareIcon, SquareIcon } from "lucide-react"
 import type { Transaction, RiskLevel, TransactionStatus } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { useLanguage } from "@/components/language-provider"
 
 interface TransactionTableProps {
   transactions: Transaction[]
@@ -42,6 +43,7 @@ function getStatusBadgeColor(status: TransactionStatus): string {
 }
 
 export function TransactionTable({ transactions }: TransactionTableProps) {
+  const { t } = useLanguage()
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [riskFilter, setRiskFilter] = useState<string>("all")
@@ -195,7 +197,7 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
           <div className="relative flex-1">
             <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search by ID, sender, receiver, or country..."
+              placeholder={t.monitoring.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
@@ -206,57 +208,57 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[140px]">
                 <FilterIcon className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={t.monitoring.status} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="flagged">Flagged</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
+                <SelectItem value="all">{t.monitoring.allStatus}</SelectItem>
+                <SelectItem value="pending">{t.status.pending}</SelectItem>
+                <SelectItem value="approved">{t.status.approved}</SelectItem>
+                <SelectItem value="flagged">{t.status.flagged}</SelectItem>
+                <SelectItem value="rejected">{t.status.rejected}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={riskFilter} onValueChange={setRiskFilter}>
               <SelectTrigger className="w-[140px]">
                 <FilterIcon className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Risk" />
+                <SelectValue placeholder={t.monitoring.risk} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Risk</SelectItem>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="critical">Critical</SelectItem>
+                <SelectItem value="all">{t.monitoring.allRisk}</SelectItem>
+                <SelectItem value="low">{t.risk.low}</SelectItem>
+                <SelectItem value="medium">{t.risk.medium}</SelectItem>
+                <SelectItem value="high">{t.risk.high}</SelectItem>
+                <SelectItem value="critical">{t.risk.critical}</SelectItem>
               </SelectContent>
             </Select>
             <Button variant="outline" onClick={() => handleExport("csv")}>
               <DownloadIcon className="mr-2 h-4 w-4" />
-              Export CSV
+              {t.monitoring.exportCSV}
             </Button>
             <Button variant="outline" onClick={() => handleExport("json")}>
               <FileJsonIcon className="mr-2 h-4 w-4" />
-              Export JSON
+              {t.monitoring.exportJSON}
             </Button>
           </div>
         </div>
         <div className="mt-4 flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
-            Showing {filteredTransactions.length.toLocaleString()} of {transactions.length.toLocaleString()} transactions
+            {t.monitoring.showing} {filteredTransactions.length.toLocaleString()} {t.monitoring.of} {transactions.length.toLocaleString()} {t.monitoring.transactions}
           </div>
           {selectedIds.size > 0 && (
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">{selectedIds.size} selected</span>
+              <span className="text-sm font-medium">{selectedIds.size} {t.monitoring.selected}</span>
               <Button size="sm" variant="outline" onClick={() => handleBulkAction("approve")}>
-                Approve
+                {t.monitoring.approve}
               </Button>
               <Button size="sm" variant="outline" onClick={() => handleBulkAction("flag")}>
-                Flag
+                {t.monitoring.flag}
               </Button>
               <Button size="sm" variant="outline" onClick={() => handleBulkAction("reject")}>
-                Reject
+                {t.monitoring.reject}
               </Button>
               <Button size="sm" variant="ghost" onClick={() => setSelectedIds(new Set())}>
-                Clear
+                {t.monitoring.clear}
               </Button>
             </div>
           )}
@@ -279,13 +281,13 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                 <SquareIcon className="h-4 w-4" />
               )}
             </button>
-            <div>Transaction ID</div>
-            <div>Timestamp</div>
-            <div>Amount</div>
-            <div>Sender</div>
-            <div>Receiver</div>
-            <div>Status</div>
-            <div>Risk</div>
+            <div>{t.table.transactionId}</div>
+            <div>{t.table.timestamp}</div>
+            <div>{t.table.amount}</div>
+            <div>{t.table.sender}</div>
+            <div>{t.table.receiver}</div>
+            <div>{t.monitoring.status}</div>
+            <div>{t.monitoring.risk}</div>
             <div>Score</div>
           </div>
         </div>
@@ -364,42 +366,42 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
         <Card className="p-6">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h3 className="text-lg font-semibold">Transaction Details</h3>
+              <h3 className="text-lg font-semibold">{t.monitoring.transactionDetails}</h3>
               <p className="text-sm text-muted-foreground font-mono">{selectedTransaction.id}</p>
             </div>
             <Button variant="ghost" size="sm" onClick={() => setSelectedTransaction(null)}>
-              Close
+              {t.monitoring.close}
             </Button>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Timestamp</p>
+              <p className="text-xs text-muted-foreground mb-1">{t.table.timestamp}</p>
               <p className="text-sm font-medium">{selectedTransaction.timestamp.toLocaleString()}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Amount</p>
+              <p className="text-xs text-muted-foreground mb-1">{t.table.amount}</p>
               <p className="text-sm font-medium">
                 {selectedTransaction.currency} {selectedTransaction.amount.toLocaleString()}
               </p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Sender</p>
+              <p className="text-xs text-muted-foreground mb-1">{t.table.sender}</p>
               <p className="text-sm font-medium">{selectedTransaction.sender}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Receiver</p>
+              <p className="text-xs text-muted-foreground mb-1">{t.table.receiver}</p>
               <p className="text-sm font-medium">{selectedTransaction.receiver}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Country</p>
+              <p className="text-xs text-muted-foreground mb-1">{t.table.country}</p>
               <p className="text-sm font-medium">{selectedTransaction.country}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Method</p>
+              <p className="text-xs text-muted-foreground mb-1">{t.table.method}</p>
               <p className="text-sm font-medium">{selectedTransaction.method}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Status</p>
+              <p className="text-xs text-muted-foreground mb-1">{t.monitoring.status}</p>
               <Badge variant="outline" className={getStatusBadgeColor(selectedTransaction.status)}>
                 {selectedTransaction.status}
               </Badge>

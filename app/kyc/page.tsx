@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useMockKYCProfiles } from "@/lib/mock-data"
 import type { KYCProfile } from "@/lib/types"
+import { useLanguage } from "@/components/language-provider"
 import { SearchIcon, FilterIcon } from "lucide-react"
 
 export default function KYCPage() {
@@ -15,6 +16,7 @@ export default function KYCPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [riskFilter, setRiskFilter] = useState<string>("all")
   const [selectedProfile, setSelectedProfile] = useState<KYCProfile | null>(null)
+  const { t } = useLanguage()
 
   useEffect(() => {
     setProfiles(useMockKYCProfiles())
@@ -36,15 +38,15 @@ export default function KYCPage() {
   return (
     <div className="flex flex-col gap-6 p-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">KYC Profiles</h1>
-        <p className="text-muted-foreground mt-1">Manage and review customer verification profiles</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t.kyc.title}</h1>
+        <p className="text-muted-foreground mt-1">{t.kyc.subtitle}</p>
       </div>
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center">
         <div className="relative flex-1">
           <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search by name, email, or ID..."
+            placeholder={t.kyc.searchPlaceholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
@@ -54,34 +56,34 @@ export default function KYCPage() {
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[140px]">
               <FilterIcon className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder={t.kyc.status} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="verified">Verified</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="review">Review</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
+              <SelectItem value="all">{t.kyc.allStatus}</SelectItem>
+              <SelectItem value="verified">{t.kyc.verified}</SelectItem>
+              <SelectItem value="pending">{t.kyc.pending}</SelectItem>
+              <SelectItem value="review">{t.kyc.review}</SelectItem>
+              <SelectItem value="rejected">{t.kyc.rejected}</SelectItem>
             </SelectContent>
           </Select>
           <Select value={riskFilter} onValueChange={setRiskFilter}>
             <SelectTrigger className="w-[140px]">
               <FilterIcon className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Risk" />
+              <SelectValue placeholder={t.kyc.risk} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Risk</SelectItem>
-              <SelectItem value="low">Low</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="critical">Critical</SelectItem>
+              <SelectItem value="all">{t.kyc.allRisk}</SelectItem>
+              <SelectItem value="low">{t.risk.low}</SelectItem>
+              <SelectItem value="medium">{t.risk.medium}</SelectItem>
+              <SelectItem value="high">{t.risk.high}</SelectItem>
+              <SelectItem value="critical">{t.risk.critical}</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
 
       <div className="text-sm text-muted-foreground">
-        Showing {filteredProfiles.length} of {profiles.length} profiles
+        {t.kyc.showing} {filteredProfiles.length} {t.kyc.of} {profiles.length} {t.kyc.profiles}
       </div>
 
       {selectedProfile ? (

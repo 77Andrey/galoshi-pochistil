@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useMockAuditLogs } from "@/lib/mock-data"
+import { useLanguage } from "@/components/language-provider"
 import { SearchIcon, FilterIcon, DownloadIcon, UserIcon, ActivityIcon } from "lucide-react"
 
 export default function AuditPage() {
@@ -14,6 +15,7 @@ export default function AuditPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [userFilter, setUserFilter] = useState<string>("all")
   const [actionFilter, setActionFilter] = useState<string>("all")
+  const { t } = useLanguage()
 
   useEffect(() => {
     setLogs(useMockAuditLogs())
@@ -64,8 +66,8 @@ export default function AuditPage() {
   return (
     <div className="flex flex-col gap-6 p-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Audit Log</h1>
-        <p className="text-muted-foreground mt-1">Complete audit trail of all system activities</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t.audit.title}</h1>
+        <p className="text-muted-foreground mt-1">{t.audit.subtitle}</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -75,7 +77,7 @@ export default function AuditPage() {
               <ActivityIcon className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Total Events</p>
+              <p className="text-sm text-muted-foreground">{t.audit.totalEvents}</p>
               <p className="text-2xl font-bold">{logs.length.toLocaleString()}</p>
             </div>
           </div>
@@ -86,7 +88,7 @@ export default function AuditPage() {
               <UserIcon className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Active Users</p>
+              <p className="text-sm text-muted-foreground">{t.audit.activeUsers}</p>
               <p className="text-2xl font-bold">{users.length}</p>
             </div>
           </div>
@@ -98,7 +100,7 @@ export default function AuditPage() {
           <div className="relative flex-1">
             <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search audit logs..."
+              placeholder={t.audit.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
@@ -108,10 +110,10 @@ export default function AuditPage() {
             <Select value={userFilter} onValueChange={setUserFilter}>
               <SelectTrigger className="w-[180px]">
                 <FilterIcon className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="User" />
+                <SelectValue placeholder={t.audit.user} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Users</SelectItem>
+                <SelectItem value="all">{t.audit.allUsers}</SelectItem>
                 {users.map((user) => (
                   <SelectItem key={user} value={user}>
                     {user}
@@ -122,10 +124,10 @@ export default function AuditPage() {
             <Select value={actionFilter} onValueChange={setActionFilter}>
               <SelectTrigger className="w-[180px]">
                 <FilterIcon className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Action" />
+                <SelectValue placeholder={t.audit.action} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Actions</SelectItem>
+                <SelectItem value="all">{t.audit.allActions}</SelectItem>
                 {actions.map((action) => (
                   <SelectItem key={action} value={action}>
                     {action}
@@ -135,12 +137,12 @@ export default function AuditPage() {
             </Select>
             <Button variant="outline" onClick={handleExport}>
               <DownloadIcon className="mr-2 h-4 w-4" />
-              Export
+              {t.audit.export}
             </Button>
           </div>
         </div>
         <div className="mt-4 text-sm text-muted-foreground">
-          Showing {filteredLogs.length.toLocaleString()} of {logs.length.toLocaleString()} events
+          {t.audit.showing} {filteredLogs.length.toLocaleString()} {t.audit.of} {logs.length.toLocaleString()} {t.audit.events}
         </div>
       </Card>
 

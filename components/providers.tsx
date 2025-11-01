@@ -2,8 +2,13 @@
 
 import { ReactNode } from "react"
 import { RoleProvider } from "@/components/role-provider"
+import { LanguageProvider } from "@/components/language-provider"
 
 export function Providers({ children }: { children: ReactNode }) {
-  return <RoleProvider>{children}</RoleProvider>
+  return (
+    <LanguageProvider>
+      <RoleProvider>{children}</RoleProvider>
+    </LanguageProvider>
+  )
 }
 

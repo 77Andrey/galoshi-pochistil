@@ -19,9 +19,13 @@ interface TransactionTrendProps {
     count: number
     volume: number
   }[]
+  title?: string
+  countLabel?: string
+  volumeLabel?: string
+  loadingText?: string
 }
 
-export function TransactionTrend({ data }: TransactionTrendProps) {
+export function TransactionTrend({ data, title, countLabel, volumeLabel, loadingText }: TransactionTrendProps) {
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
@@ -38,10 +42,12 @@ export function TransactionTrend({ data }: TransactionTrendProps) {
     return (
       <Card className="col-span-2">
         <CardHeader>
-          <CardTitle>Transaction Trend (30 Days)</CardTitle>
+          <CardTitle>{title || "Transaction Trend (30 Days)"}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px] flex items-center justify-center text-muted-foreground">Loading chart...</div>
+          <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+            {loadingText || "Loading chart..."}
+          </div>
         </CardContent>
       </Card>
     )
@@ -50,7 +56,7 @@ export function TransactionTrend({ data }: TransactionTrendProps) {
   return (
     <Card className="col-span-2">
       <CardHeader>
-        <CardTitle>Transaction Trend (30 Days)</CardTitle>
+        <CardTitle>{title || "Transaction Trend (30 Days)"}</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
@@ -73,7 +79,7 @@ export function TransactionTrend({ data }: TransactionTrendProps) {
               dataKey="count"
               stroke="#0a0a0a"
               strokeWidth={2}
-              name="Transaction Count"
+              name={countLabel || "Transaction Count"}
               dot={false}
             />
             <Line
@@ -82,7 +88,7 @@ export function TransactionTrend({ data }: TransactionTrendProps) {
               dataKey="volume"
               stroke="#737373"
               strokeWidth={2}
-              name="Volume (M)"
+              name={volumeLabel || "Volume (M)"}
               dot={false}
             />
           </LineChart>

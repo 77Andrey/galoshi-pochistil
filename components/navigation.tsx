@@ -13,6 +13,7 @@ import {
   UserIcon,
   ShieldCheck,
   EyeIcon,
+  LanguagesIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useKeyboardShortcuts } from "@/lib/hooks/use-keyboard-shortcuts"
@@ -20,21 +21,23 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useRole } from "@/components/role-provider"
-
-const navigation = [
-  { name: "Overview", href: "/", icon: LayoutDashboardIcon, shortcut: "g o" },
-  { name: "Monitoring", href: "/monitoring", icon: ActivityIcon, shortcut: "g m" },
-  { name: "KYC Profiles", href: "/kyc", icon: UserCheckIcon, shortcut: "g k" },
-  { name: "Investigations", href: "/investigations", icon: SearchIcon, shortcut: "g i" },
-  { name: "Policies", href: "/policies", icon: ShieldCheckIcon, shortcut: "g p" },
-  { name: "Audit Log", href: "/audit", icon: FileTextIcon, shortcut: "g a" },
-]
+import { useLanguage } from "@/components/language-provider"
 
 export function Navigation() {
   const pathname = usePathname()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const { role, setRole } = useRole()
+  const { language, setLanguage, t } = useLanguage()
   useKeyboardShortcuts()
+
+  const navigation = [
+    { name: t.nav.overview, href: "/", icon: LayoutDashboardIcon, shortcut: "g o" },
+    { name: t.nav.monitoring, href: "/monitoring", icon: ActivityIcon, shortcut: "g m" },
+    { name: t.nav.kyc, href: "/kyc", icon: UserCheckIcon, shortcut: "g k" },
+    { name: t.nav.investigations, href: "/investigations", icon: SearchIcon, shortcut: "g i" },
+    { name: t.nav.policies, href: "/policies", icon: ShieldCheckIcon, shortcut: "g p" },
+    { name: t.nav.audit, href: "/audit", icon: FileTextIcon, shortcut: "g a" },
+  ]
 
   const roleIcons = {
     viewer: EyeIcon,
@@ -123,6 +126,29 @@ export function Navigation() {
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="h-4 w-4" />
                     <span>Admin</span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground mb-2 font-medium">Language</p>
+            <Select value={language} onValueChange={setLanguage}>
+              <SelectTrigger className="w-full">
+                <LanguagesIcon className="mr-2 h-4 w-4" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold">🇬🇧</span>
+                    <span>English</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="ru">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold">🇷🇺</span>
+                    <span>Русский</span>
                   </div>
                 </SelectItem>
               </SelectContent>

@@ -18,6 +18,8 @@ interface RiskDistributionProps {
     high: number
     critical: number
   }
+  title?: string
+  loadingText?: string
 }
 
 const COLORS = {
@@ -27,7 +29,7 @@ const COLORS = {
   critical: "#dc2626",
 }
 
-export function RiskDistribution({ data }: RiskDistributionProps) {
+export function RiskDistribution({ data, title, loadingText }: RiskDistributionProps) {
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
@@ -45,10 +47,12 @@ export function RiskDistribution({ data }: RiskDistributionProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Risk Distribution</CardTitle>
+          <CardTitle>{title || "Risk Distribution"}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px] flex items-center justify-center text-muted-foreground">Loading chart...</div>
+          <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+            {loadingText || "Loading chart..."}
+          </div>
         </CardContent>
       </Card>
     )
@@ -57,7 +61,7 @@ export function RiskDistribution({ data }: RiskDistributionProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Risk Distribution</CardTitle>
+        <CardTitle>{title || "Risk Distribution"}</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>

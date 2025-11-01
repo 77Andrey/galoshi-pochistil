@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import type { Investigation } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { useLanguage } from "@/components/language-provider"
 import { UserIcon, CalendarIcon, ClockIcon } from "lucide-react"
 
 interface InvestigationCardProps {
@@ -41,6 +42,8 @@ function getStatusBadgeColor(status: string): string {
 }
 
 export function InvestigationCard({ investigation, onViewDetails }: InvestigationCardProps) {
+  const { t } = useLanguage()
+  
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
@@ -68,16 +71,16 @@ export function InvestigationCard({ investigation, onViewDetails }: Investigatio
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <CalendarIcon className="h-3.5 w-3.5" />
-            <span className="text-xs">Created {investigation.createdAt.toLocaleDateString()}</span>
+            <span className="text-xs">{t.investigations.created} {investigation.createdAt.toLocaleDateString()}</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <ClockIcon className="h-3.5 w-3.5" />
-            <span className="text-xs">Updated {investigation.updatedAt.toLocaleDateString()}</span>
+            <span className="text-xs">{t.investigations.updated} {investigation.updatedAt.toLocaleDateString()}</span>
           </div>
         </div>
 
         <div className="pt-2 border-t border-border">
-          <p className="text-xs text-muted-foreground">Assigned to</p>
+          <p className="text-xs text-muted-foreground">{t.investigations.assignedTo}</p>
           <p className="text-sm font-medium">{investigation.assignee}</p>
         </div>
 
@@ -87,7 +90,7 @@ export function InvestigationCard({ investigation, onViewDetails }: Investigatio
           className="w-full bg-transparent"
           onClick={() => onViewDetails(investigation)}
         >
-          View Investigation
+          {t.investigations.viewInvestigation}
         </Button>
       </CardContent>
     </Card>

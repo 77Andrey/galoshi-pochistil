@@ -10,6 +10,7 @@ interface TopRiskCountriesProps {
     count: number
     riskScore: number
   }[]
+  title?: string
 }
 
 function getRiskColor(score: number): string {
@@ -19,11 +20,11 @@ function getRiskColor(score: number): string {
   return "bg-red-100 text-red-800 border-red-200"
 }
 
-export function TopRiskCountries({ data }: TopRiskCountriesProps) {
+export function TopRiskCountries({ data, title }: TopRiskCountriesProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Top Risk Countries</CardTitle>
+        <CardTitle>{title || "Top Risk Countries"}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
