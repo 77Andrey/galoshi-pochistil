@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { useSearchParams, useRouter, usePathname } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { useVirtualizer } from "@tanstack/react-virtual"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -43,23 +43,37 @@ function getStatusBadgeColor(status: TransactionStatus): string {
 }
 
 export function TransactionTable({ transactions }: TransactionTableProps) {
-  const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "")
-  const [statusFilter, setStatusFilter] = useState<string>(searchParams.get("status") || "all")
-  const [riskFilter, setRiskFilter] = useState<string>(searchParams.get("risk") || "all")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [statusFilter, setStatusFilter] = useState<string>("all")
+  const [riskFilter, setRiskFilter] = useState<string>("all")
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
   const [parentRef, setParentRef] = useState<HTMLDivElement | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
+  // Read URL params on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search)
+      setSearchQuery(params.get("search") || "")
+      setStatusFilter(params.get("status") || "all")
+      setRiskFilter(params.get("risk") || "all")
+    }
+  }, [])
+
   // Update URL when filters change
   useEffect(() => {
-    const params = new URLSearchParams()
-    if (searchQuery) params.set("search", searchQuery)
-    if (statusFilter !== "all") params.set("status", statusFilter)
-    if (riskFilter !== "all") params.set("risk", riskFilter)
-    router.replace(`${pathname}${params.toString() ? `?${params.toString()}` : ""}`)
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams()
+      if (searchQuery) params.set("search", searchQuery)
+      if (statusFilter !== "all") params.set("status", statusFilter)
+      if (riskFilter !== "all") params.set("risk", riskFilter)
+      const newUrl = `${pathname}${params.toString() ? `?${params.toString()}` : ""}`
+      if (window.location.href !== `${window.location.origin}${newUrl}`) {
+        router.replace(newUrl)
+      }
+    }
   }, [searchQuery, statusFilter, riskFilter, pathname, router])
 
   const filteredTransactions = useMemo(() => {
