@@ -1,21 +1,26 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ProfileCard } from "@/components/kyc/profile-card"
 import { ProfileDetails } from "@/components/kyc/profile-details"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { mockKYCProfiles } from "@/lib/mock-data"
+import { useMockKYCProfiles } from "@/lib/mock-data"
 import type { KYCProfile } from "@/lib/types"
 import { SearchIcon, FilterIcon } from "lucide-react"
 
 export default function KYCPage() {
+  const [profiles, setProfiles] = useState(useMockKYCProfiles())
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [riskFilter, setRiskFilter] = useState<string>("all")
   const [selectedProfile, setSelectedProfile] = useState<KYCProfile | null>(null)
 
-  const filteredProfiles = mockKYCProfiles.filter((profile) => {
+  useEffect(() => {
+    setProfiles(useMockKYCProfiles())
+  }, [])
+
+  const filteredProfiles = profiles.filter((profile) => {
     const matchesSearch =
       searchQuery === "" ||
       profile.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -76,7 +81,7 @@ export default function KYCPage() {
       </div>
 
       <div className="text-sm text-muted-foreground">
-        Showing {filteredProfiles.length} of {mockKYCProfiles.length} profiles
+        Showing {filteredProfiles.length} of {profiles.length} profiles
       </div>
 
       {selectedProfile ? (

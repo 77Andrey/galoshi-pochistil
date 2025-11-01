@@ -1,19 +1,27 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { InvestigationCard } from "@/components/investigations/investigation-card"
+import { InvestigationDetail } from "@/components/investigations/investigation-detail"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-import { mockInvestigations } from "@/lib/mock-data"
+import { useMockInvestigations } from "@/lib/mock-data"
+import type { Investigation } from "@/lib/types"
 import { SearchIcon, FilterIcon, PlusIcon } from "lucide-react"
 
 export default function InvestigationsPage() {
+  const [investigations, setInvestigations] = useState(useMockInvestigations())
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [priorityFilter, setPriorityFilter] = useState<string>("all")
+  const [selectedInvestigation, setSelectedInvestigation] = useState<Investigation | null>(null)
 
-  const filteredInvestigations = mockInvestigations.filter((investigation) => {
+  useEffect(() => {
+    setInvestigations(useMockInvestigations())
+  }, [])
+
+  const filteredInvestigations = investigations.filter((investigation) => {
     const matchesSearch =
       searchQuery === "" ||
       investigation.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -78,19 +86,28 @@ export default function InvestigationsPage() {
         </div>
       </div>
 
-      <div className="text-sm text-muted-foreground">
-        Showing {filteredInvestigations.length} of {mockInvestigations.length} investigations
-      </div>
+      {!selectedInvestigation && (
+        <div className="text-sm text-muted-foreground">
+          Showing {filteredInvestigations.length} of {investigations.length} investigations
+        </div>
+      )}
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredInvestigations.map((investigation) => (
-          <InvestigationCard
-            key={investigation.id}
-            investigation={investigation}
-            onViewDetails={(inv) => console.log("View details:", inv)}
-          />
-        ))}
-      </div>
+      {selectedInvestigation ? (
+        <InvestigationDetail
+          investigation={selectedInvestigation}
+          onClose={() => setSelectedInvestigation(null)}
+        />
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {filteredInvestigations.map((investigation) => (
+            <InvestigationCard
+              key={investigation.id}
+              investigation={investigation}
+              onViewDetails={setSelectedInvestigation}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

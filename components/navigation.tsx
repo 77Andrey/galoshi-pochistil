@@ -10,11 +10,16 @@ import {
   FileTextIcon,
   ShieldCheckIcon,
   MenuIcon,
+  UserIcon,
+  ShieldCheck,
+  EyeIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useKeyboardShortcuts } from "@/lib/hooks/use-keyboard-shortcuts"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useRole } from "@/components/role-provider"
 
 const navigation = [
   { name: "Overview", href: "/", icon: LayoutDashboardIcon, shortcut: "g o" },
@@ -28,7 +33,16 @@ const navigation = [
 export function Navigation() {
   const pathname = usePathname()
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const { role, setRole } = useRole()
   useKeyboardShortcuts()
+
+  const roleIcons = {
+    viewer: EyeIcon,
+    analyst: UserIcon,
+    admin: ShieldCheck,
+  }
+
+  const RoleIcon = roleIcons[role]
 
   return (
     <nav
@@ -84,7 +98,36 @@ export function Navigation() {
       </div>
 
       {!isCollapsed && (
-        <div className="border-t border-border p-4">
+        <div className="border-t border-border p-4 space-y-4">
+          <div>
+            <p className="text-xs text-muted-foreground mb-2 font-medium">Role</p>
+            <Select value={role} onValueChange={setRole}>
+              <SelectTrigger className="w-full">
+                <RoleIcon className="mr-2 h-4 w-4" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="viewer">
+                  <div className="flex items-center gap-2">
+                    <EyeIcon className="h-4 w-4" />
+                    <span>Viewer</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="analyst">
+                  <div className="flex items-center gap-2">
+                    <UserIcon className="h-4 w-4" />
+                    <span>Analyst</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="admin">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4" />
+                    <span>Admin</span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="text-xs text-muted-foreground">
             <p className="mb-1 font-medium">Keyboard Shortcuts</p>
             <p>

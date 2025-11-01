@@ -1,12 +1,20 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { MetricCard } from "@/components/dashboard/metric-card"
 import { RiskDistribution } from "@/components/dashboard/risk-distribution"
 import { TransactionTrend } from "@/components/dashboard/transaction-trend"
 import { TopRiskCountries } from "@/components/dashboard/top-risk-countries"
-import { mockDashboardMetrics } from "@/lib/mock-data"
+import { QuickActions } from "@/components/dashboard/quick-actions"
+import { useMockDashboardMetrics } from "@/lib/mock-data"
 import { ActivityIcon, AlertTriangleIcon, DollarSignIcon, SearchIcon, UserCheckIcon } from "lucide-react"
 
 export default function OverviewPage() {
-  const metrics = mockDashboardMetrics
+  const [metrics, setMetrics] = useState(useMockDashboardMetrics())
+
+  useEffect(() => {
+    setMetrics(useMockDashboardMetrics())
+  }, [])
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -14,6 +22,8 @@ export default function OverviewPage() {
         <h1 className="text-3xl font-bold tracking-tight">Overview</h1>
         <p className="text-muted-foreground mt-1">Real-time KYC/AML monitoring and analytics</p>
       </div>
+
+      <QuickActions />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <MetricCard

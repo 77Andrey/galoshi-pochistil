@@ -1,7 +1,16 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { TransactionTable } from "@/components/monitoring/transaction-table"
-import { mockTransactions } from "@/lib/mock-data"
+import { useMockTransactions } from "@/lib/mock-data"
 
 export default function MonitoringPage() {
+  const [transactions, setTransactions] = useState(useMockTransactions())
+
+  useEffect(() => {
+    setTransactions(useMockTransactions())
+  }, [])
+
   return (
     <div className="flex flex-col gap-6 p-6">
       <div>
@@ -9,7 +18,7 @@ export default function MonitoringPage() {
         <p className="text-muted-foreground mt-1">Real-time transaction monitoring and risk assessment</p>
       </div>
 
-      <TransactionTable transactions={mockTransactions} />
+      <TransactionTable transactions={transactions} />
     </div>
   )
 }

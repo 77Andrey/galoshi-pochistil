@@ -1,7 +1,15 @@
 "use client"
 
+import { useState, useEffect } from "react"
+import dynamic from "next/dynamic"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts"
+
+const PieChart = dynamic(() => import("recharts").then((mod) => mod.PieChart), { ssr: false })
+const Pie = dynamic(() => import("recharts").then((mod) => mod.Pie), { ssr: false })
+const Cell = dynamic(() => import("recharts").then((mod) => mod.Cell), { ssr: false })
+const ResponsiveContainer = dynamic(() => import("recharts").then((mod) => mod.ResponsiveContainer), { ssr: false })
+const Legend = dynamic(() => import("recharts").then((mod) => mod.Legend), { ssr: false })
+const Tooltip = dynamic(() => import("recharts").then((mod) => mod.Tooltip), { ssr: false })
 
 interface RiskDistributionProps {
   data: {
@@ -20,12 +28,31 @@ const COLORS = {
 }
 
 export function RiskDistribution({ data }: RiskDistributionProps) {
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   const chartData = [
     { name: "Low", value: data.low, color: COLORS.low },
     { name: "Medium", value: data.medium, color: COLORS.medium },
     { name: "High", value: data.high, color: COLORS.high },
     { name: "Critical", value: data.critical, color: COLORS.critical },
   ]
+
+  if (!isMounted) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Risk Distribution</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] flex items-center justify-center text-muted-foreground">Loading chart...</div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Card>

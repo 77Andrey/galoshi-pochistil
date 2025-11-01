@@ -282,9 +282,94 @@ export function generateDashboardMetrics(transactions: Transaction[], profiles: 
   }
 }
 
-// Generate initial data
-export const mockTransactions = generateTransactions(10000)
-export const mockKYCProfiles = generateKYCProfiles(500)
-export const mockInvestigations = generateInvestigations(50)
-export const mockAuditLogs = generateAuditLogs(1000)
-export const mockDashboardMetrics = generateDashboardMetrics(mockTransactions, mockKYCProfiles)
+// Client-side data generation - call after mount to avoid SSR issues
+let _mockTransactions: Transaction[] | null = null
+let _mockKYCProfiles: KYCProfile[] | null = null
+let _mockInvestigations: Investigation[] | null = null
+let _mockAuditLogs: AuditLog[] | null = null
+let _mockDashboardMetrics: DashboardMetrics | null = null
+
+export function getMockData() {
+  if (typeof window === "undefined") {
+    // Return empty data for SSR
+    return {
+      transactions: [],
+      kycProfiles: [],
+      investigations: [],
+      auditLogs: [],
+      dashboardMetrics: {
+        totalTransactions: 0,
+        flaggedTransactions: 0,
+        totalVolume: 0,
+        activeInvestigations: 0,
+        pendingKYC: 0,
+        riskDistribution: { low: 0, medium: 0, high: 0, critical: 0 },
+        transactionTrend: [],
+        topRiskCountries: [],
+      },
+    }
+  }
+
+  if (!_mockTransactions) {
+    _mockTransactions = generateTransactions(10000)
+    _mockKYCProfiles = generateKYCProfiles(500)
+    _mockInvestigations = generateInvestigations(50)
+    _mockAuditLogs = generateAuditLogs(1000)
+    _mockDashboardMetrics = generateDashboardMetrics(_mockTransactions, _mockKYCProfiles)
+  }
+
+  return {
+    transactions: _mockTransactions,
+    kycProfiles: _mockKYCProfiles,
+    investigations: _mockInvestigations,
+    auditLogs: _mockAuditLogs,
+    dashboardMetrics: _mockDashboardMetrics!,
+  }
+}
+
+// Export functions for individual data access
+export function useMockTransactions() {
+  if (typeof window === "undefined") return []
+  if (!_mockTransactions) _mockTransactions = generateTransactions(10000)
+  return _mockTransactions
+}
+
+export function useMockKYCProfiles() {
+  if (typeof window === "undefined") return []
+  if (!_mockKYCProfiles) _mockKYCProfiles = generateKYCProfiles(500)
+  return _mockKYCProfiles
+}
+
+export function useMockInvestigations() {
+  if (typeof window === "undefined") return []
+  if (!_mockInvestigations) _mockInvestigations = generateInvestigations(50)
+  return _mockInvestigations
+}
+
+export function useMockAuditLogs() {
+  if (typeof window === "undefined") return []
+  if (!_mockAuditLogs) _mockAuditLogs = generateAuditLogs(1000)
+  return _mockAuditLogs
+}
+
+export function useMockDashboardMetrics() {
+  if (typeof window === "undefined")
+    return {
+      totalTransactions: 0,
+      flaggedTransactions: 0,
+      totalVolume: 0,
+      activeInvestigations: 0,
+      pendingKYC: 0,
+      riskDistribution: { low: 0, medium: 0, high: 0, critical: 0 },
+      transactionTrend: [],
+      topRiskCountries: [],
+    }
+  if (!_mockTransactions || !_mockKYCProfiles) {
+    _mockTransactions = generateTransactions(10000)
+    _mockKYCProfiles = generateKYCProfiles(500)
+  }
+  if (!_mockDashboardMetrics) {
+    _mockDashboardMetrics = generateDashboardMetrics(_mockTransactions, _mockKYCProfiles)
+  }
+  return _mockDashboardMetrics
+}

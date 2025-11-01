@@ -4,12 +4,23 @@ An interactive KYC/AML operations console built with Next.js, featuring a Neo-Sw
 
 ## Features
 
-- **Overview Dashboard**: Real-time KPIs, incident trends, and regional risk distribution
-- **Transaction Monitoring**: Virtualized table handling 10-20K transactions with advanced filtering
+- **Overview Dashboard**: 
+  - Real-time KPIs, incident trends, and regional risk distribution
+  - Quick Actions panel for common tasks
+- **Transaction Monitoring**: 
+  - Virtualized table handling 10K+ transactions with advanced filtering
+  - Sticky header for easy column reference
+  - URL-based filter persistence (filters saved in URL)
+  - Bulk actions: approve, flag, or reject multiple transactions
+  - Multi-select with checkbox selection
+  - Export to CSV or JSON formats (client-side only)
 - **KYC Profiles**: Customer verification and behavioral analysis
-- **Investigation Management**: Kanban-style workflow for compliance cases
-- **Policy Engine**: Rule configuration and management
-- **Audit Log**: Complete system activity tracking
+- **Investigation Management**: 
+  - Task templates and checklists for different investigation types
+  - @mentions for team collaboration
+  - Activity timeline with comments
+- **Role-Based Access Control**: Viewer/Analyst/Admin roles (UI-level permissions)
+- **Audit Log**: Complete system activity tracking with filtering and export
 - **Keyboard Shortcuts**: Efficient navigation (/ for search, g+key for pages)
 
 ## Technology Stack
@@ -41,12 +52,24 @@ This project is specifically configured for reliable deployment on Vercel:
 ### Build Configuration
 - TypeScript errors don't block builds (`ignoreBuildErrors: true`)
 - ESLint warnings don't fail deployment (`ignoreDuringBuilds: true`)
+- `skipLibCheck: true` for faster TypeScript compilation
 - Pure JavaScript/TypeScript dependencies only (no native binaries)
 
 ### Performance Optimizations
 - Mock data generation happens after component mount (not during build)
-- Table virtualization for handling large datasets
-- Lazy loading for heavy components
+- Table virtualization for handling large datasets (10K+ rows)
+- Lazy loading for heavy components (charts loaded dynamically)
+- Client-side caching of generated mock data
+
+### Vercel-Safe Guarantees
+✅ **No Server Dependencies**: 100% static export, no API routes or server actions  
+✅ **No Build-Time Data**: All 10K+ transactions generated client-side after mount  
+✅ **No DOM in SSR**: All charts and interactive components use dynamic imports with `ssr: false`  
+✅ **No External APIs**: Zero network dependencies, fully self-contained  
+✅ **No Environment Variables**: Works out-of-the-box without configuration  
+✅ **Pure Client Export**: Can be deployed to any static hosting (Vercel, Netlify, Cloudflare Pages, etc.)  
+✅ **CSV Export via Blob**: File downloads use browser APIs only  
+✅ **URL State Management**: Filters saved in URL using Next.js navigation hooks (client-side only)
 
 ## Getting Started
 
@@ -81,22 +104,31 @@ vercel
 
 \`\`\`
 ├── app/
-│   ├── page.tsx                 # Overview dashboard
-│   ├── monitoring/              # Transaction monitoring
-│   ├── kyc/                     # Customer profiles
-│   ├── investigations/          # Investigation management
-│   ├── policies/                # Rule configuration
-│   └── audit/                   # Audit log
+│   ├── page.tsx                    # Overview dashboard (client-side)
+│   ├── monitoring/page.tsx         # Transaction monitoring (client-side)
+│   ├── kyc/page.tsx                # Customer profiles (client-side)
+│   ├── investigations/page.tsx     # Investigation management (client-side)
+│   ├── policies/page.tsx           # Rule configuration (client-side)
+│   ├── audit/page.tsx              # Audit log (client-side)
+│   └── layout.tsx                  # Root layout with providers
 ├── components/
-│   ├── ui/                      # shadcn/ui components
-│   ├── navigation.tsx           # Main navigation
-│   ├── risk-badge.tsx           # Risk level indicators
-│   └── stat-card.tsx            # KPI cards
+│   ├── ui/                         # shadcn/ui components
+│   ├── navigation.tsx              # Main navigation with role selector
+│   ├── role-provider.tsx           # Role-based access control
+│   ├── providers.tsx               # Client-side context providers
+│   ├── dashboard/                  # Dashboard chart components
+│   ├── monitoring/                 # Transaction table with virtualization
+│   ├── investigations/             # Investigation cards and detail views
+│   ├── kyc/                        # Profile cards and details
+│   ├── risk-badge.tsx              # Risk level indicators
+│   └── stat-card.tsx               # KPI cards
 ├── lib/
-│   ├── mock-data.ts             # Synthetic data generator
+│   ├── mock-data.ts                # Client-side synthetic data generator
+│   ├── types.ts                    # TypeScript definitions
+│   ├── utils.ts                    # Utility functions
 │   └── hooks/
 │       └── use-keyboard-shortcuts.ts
-└── next.config.ts               # Static export configuration
+└── next.config.ts                  # Static export configuration
 \`\`\`
 
 ## Keyboard Shortcuts
@@ -134,13 +166,27 @@ vercel
 
 All data is synthetically generated using a seeded random number generator for deterministic results:
 
-- **Transactions**: 10,000+ records with realistic patterns
-- **Customers**: 1,000+ profiles with KYC status
-- **Investigations**: 100+ cases across different statuses
-- **Audit Logs**: 500+ system events
-- **Rules**: 8 pre-configured compliance rules
+- **Transactions**: 10,000 records with realistic patterns, risk scores, and statuses
+- **KYC Profiles**: 500 customer profiles with verification status and risk levels
+- **Investigations**: 50 cases across different types and priorities
+- **Audit Logs**: 1,000 system events with user tracking
 
-Data generation happens on the client side after component mount to avoid bloating the build bundle.
+### Data Generation Strategy
+
+Data generation happens **100% on the client side** after component mount to avoid bloating the build bundle:
+- Initial empty arrays returned during SSR
+- Data generated on first access after mount
+- Results cached for subsequent access
+- No impact on build time or bundle size
+
+### Features Enabled by Mock Data
+- Interactive charts with 30-day trends
+- Risk distribution across all entities
+- Top risk countries analysis
+- Full table virtualization with filtering
+- URL-based state persistence
+- CSV export functionality
+- Complete audit trail simulation
 
 ## License
 

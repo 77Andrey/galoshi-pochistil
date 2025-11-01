@@ -1,13 +1,14 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { useVirtualizer } from "@tanstack/react-virtual"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { SearchIcon, FilterIcon, DownloadIcon } from "lucide-react"
+import { SearchIcon, FilterIcon, DownloadIcon, FileJsonIcon, CheckSquareIcon, SquareIcon } from "lucide-react"
 import type { Transaction, RiskLevel, TransactionStatus } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -42,10 +43,24 @@ function getStatusBadgeColor(status: TransactionStatus): string {
 }
 
 export function TransactionTable({ transactions }: TransactionTableProps) {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [riskFilter, setRiskFilter] = useState<string>("all")
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "")
+  const [statusFilter, setStatusFilter] = useState<string>(searchParams.get("status") || "all")
+  const [riskFilter, setRiskFilter] = useState<string>(searchParams.get("risk") || "all")
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
+  const [parentRef, setParentRef] = useState<HTMLDivElement | null>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+
+  // Update URL when filters change
+  useEffect(() => {
+    const params = new URLSearchParams()
+    if (searchQuery) params.set("search", searchQuery)
+    if (statusFilter !== "all") params.set("status", statusFilter)
+    if (riskFilter !== "all") params.set("risk", riskFilter)
+    router.replace(`${pathname}${params.toString() ? `?${params.toString()}` : ""}`)
+  }, [searchQuery, statusFilter, riskFilter, pathname, router])
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter((transaction) => {
@@ -63,8 +78,6 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
     })
   }, [transactions, searchQuery, statusFilter, riskFilter])
 
-  const parentRef = useState<HTMLDivElement | null>(null)[0]
-
   const rowVirtualizer = useVirtualizer({
     count: filteredTransactions.length,
     getScrollElement: () => parentRef,
@@ -72,44 +85,94 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
     overscan: 10,
   })
 
-  const handleExport = () => {
-    const csv = [
-      [
-        "ID",
-        "Timestamp",
-        "Amount",
-        "Currency",
-        "Sender",
-        "Receiver",
-        "Status",
-        "Risk Level",
-        "Risk Score",
-        "Country",
-        "Method",
-      ].join(","),
-      ...filteredTransactions.map((t) =>
-        [
-          t.id,
-          t.timestamp.toISOString(),
-          t.amount,
-          t.currency,
-          t.sender,
-          t.receiver,
-          t.status,
-          t.riskLevel,
-          t.riskScore,
-          t.country,
-          t.method,
-        ].join(","),
-      ),
-    ].join("\n")
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filteredTransactions.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(filteredTransactions.map((t) => t.id)))
+    }
+  }
 
-    const blob = new Blob([csv], { type: "text/csv" })
+  const toggleSelect = (id: string) => {
+    const newSelected = new Set(selectedIds)
+    if (newSelected.has(id)) {
+      newSelected.delete(id)
+    } else {
+      newSelected.add(id)
+    }
+    setSelectedIds(newSelected)
+  }
+
+  const handleExport = (format: "csv" | "json" = "csv") => {
+    const dataToExport = filteredTransactions.map((t) => ({
+      id: t.id,
+      timestamp: t.timestamp.toISOString(),
+      amount: t.amount,
+      currency: t.currency,
+      sender: t.sender,
+      receiver: t.receiver,
+      status: t.status,
+      riskLevel: t.riskLevel,
+      riskScore: t.riskScore,
+      country: t.country,
+      method: t.method,
+    }))
+
+    let content: string
+    let mimeType: string
+    let extension: string
+
+    if (format === "json") {
+      content = JSON.stringify(dataToExport, null, 2)
+      mimeType = "application/json"
+      extension = "json"
+    } else {
+      content = [
+        [
+          "ID",
+          "Timestamp",
+          "Amount",
+          "Currency",
+          "Sender",
+          "Receiver",
+          "Status",
+          "Risk Level",
+          "Risk Score",
+          "Country",
+          "Method",
+        ].join(","),
+        ...dataToExport.map((t) =>
+          [
+            t.id,
+            t.timestamp,
+            t.amount,
+            t.currency,
+            t.sender,
+            t.receiver,
+            t.status,
+            t.riskLevel,
+            t.riskScore,
+            t.country,
+            t.method,
+          ].join(","),
+        ),
+      ].join("\n")
+      mimeType = "text/csv"
+      extension = "csv"
+    }
+
+    const blob = new Blob([content], { type: mimeType })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = `transactions-${new Date().toISOString()}.csv`
+    a.download = `transactions-${new Date().toISOString()}.${extension}`
     a.click()
+  }
+
+  const handleBulkAction = (action: string) => {
+    const selected = filteredTransactions.filter((t) => selectedIds.has(t.id))
+    console.log(`Bulk action "${action}" on ${selected.length} transactions:`, selected)
+    setSelectedIds(new Set())
   }
 
   return (
@@ -153,38 +216,67 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                 <SelectItem value="critical">Critical</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" onClick={handleExport}>
+            <Button variant="outline" onClick={() => handleExport("csv")}>
               <DownloadIcon className="mr-2 h-4 w-4" />
-              Export
+              Export CSV
+            </Button>
+            <Button variant="outline" onClick={() => handleExport("json")}>
+              <FileJsonIcon className="mr-2 h-4 w-4" />
+              Export JSON
             </Button>
           </div>
         </div>
-        <div className="mt-4 text-sm text-muted-foreground">
-          Showing {filteredTransactions.length.toLocaleString()} of {transactions.length.toLocaleString()} transactions
+        <div className="mt-4 flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Showing {filteredTransactions.length.toLocaleString()} of {transactions.length.toLocaleString()} transactions
+          </div>
+          {selectedIds.size > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">{selectedIds.size} selected</span>
+              <Button size="sm" variant="outline" onClick={() => handleBulkAction("approve")}>
+                Approve
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => handleBulkAction("flag")}>
+                Flag
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => handleBulkAction("reject")}>
+                Reject
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setSelectedIds(new Set())}>
+                Clear
+              </Button>
+            </div>
+          )}
         </div>
       </Card>
 
       <Card className="flex-1 overflow-hidden">
-        <div className="border-b border-border bg-muted/50 px-4 py-3">
-          <div className="grid grid-cols-12 gap-4 text-xs font-medium text-muted-foreground">
-            <div className="col-span-2">Transaction ID</div>
-            <div className="col-span-2">Timestamp</div>
-            <div className="col-span-1">Amount</div>
-            <div className="col-span-2">Sender</div>
-            <div className="col-span-2">Receiver</div>
-            <div className="col-span-1">Status</div>
-            <div className="col-span-1">Risk</div>
-            <div className="col-span-1">Score</div>
+        <div className="border-b border-border bg-muted/50 px-4 py-3 sticky top-0 z-10">
+          <div className="grid grid-cols-[40px_1fr_1fr_80px_1fr_1fr_100px_80px_80px] gap-4 text-xs font-medium text-muted-foreground">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                toggleSelectAll()
+              }}
+              className="flex items-center justify-center"
+            >
+              {selectedIds.size === filteredTransactions.length ? (
+                <CheckSquareIcon className="h-4 w-4" />
+              ) : (
+                <SquareIcon className="h-4 w-4" />
+              )}
+            </button>
+            <div>Transaction ID</div>
+            <div>Timestamp</div>
+            <div>Amount</div>
+            <div>Sender</div>
+            <div>Receiver</div>
+            <div>Status</div>
+            <div>Risk</div>
+            <div>Score</div>
           </div>
         </div>
-        <div
-          ref={(node) => {
-            if (node) {
-              parentRef.current = node
-            }
-          }}
-          className="h-[600px] overflow-auto"
-        >
+        <div ref={setParentRef} className="h-[600px] overflow-auto">
           <div
             style={{
               height: `${rowVirtualizer.getTotalSize()}px`,
@@ -206,32 +298,47 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                     transform: `translateY(${virtualRow.start}px)`,
                   }}
                   className={cn(
-                    "border-b border-border px-4 py-3 hover:bg-muted/50 cursor-pointer transition-colors",
+                    "border-b border-border px-4 py-3 hover:bg-muted/50 transition-colors",
                     selectedTransaction?.id === transaction.id && "bg-muted",
                   )}
-                  onClick={() => setSelectedTransaction(transaction)}
                 >
-                  <div className="grid grid-cols-12 gap-4 items-center text-sm">
-                    <div className="col-span-2 font-mono text-xs">{transaction.id}</div>
-                    <div className="col-span-2 text-xs text-muted-foreground">
+                  <div
+                    className="grid grid-cols-[40px_1fr_1fr_80px_1fr_1fr_100px_80px_80px] gap-4 items-center text-sm cursor-pointer"
+                    onClick={() => setSelectedTransaction(transaction)}
+                  >
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        toggleSelect(transaction.id)
+                      }}
+                      className="flex items-center justify-center"
+                    >
+                      {selectedIds.has(transaction.id) ? (
+                        <CheckSquareIcon className="h-4 w-4" />
+                      ) : (
+                        <SquareIcon className="h-4 w-4" />
+                      )}
+                    </button>
+                    <div className="font-mono text-xs">{transaction.id}</div>
+                    <div className="text-xs text-muted-foreground">
                       {transaction.timestamp.toLocaleString()}
                     </div>
-                    <div className="col-span-1 font-medium">
+                    <div className="font-medium">
                       {transaction.currency} {transaction.amount.toLocaleString()}
                     </div>
-                    <div className="col-span-2 truncate">{transaction.sender}</div>
-                    <div className="col-span-2 truncate">{transaction.receiver}</div>
-                    <div className="col-span-1">
+                    <div className="truncate">{transaction.sender}</div>
+                    <div className="truncate">{transaction.receiver}</div>
+                    <div>
                       <Badge variant="outline" className={cn("text-xs", getStatusBadgeColor(transaction.status))}>
                         {transaction.status}
                       </Badge>
                     </div>
-                    <div className="col-span-1">
+                    <div>
                       <Badge variant="outline" className={cn("text-xs", getRiskBadgeColor(transaction.riskLevel))}>
                         {transaction.riskLevel}
                       </Badge>
                     </div>
-                    <div className="col-span-1 font-mono text-xs">{transaction.riskScore}</div>
+                    <div className="font-mono text-xs">{transaction.riskScore}</div>
                   </div>
                 </div>
               )

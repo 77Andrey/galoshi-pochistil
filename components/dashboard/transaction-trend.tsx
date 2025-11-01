@@ -1,7 +1,17 @@
 "use client"
 
+import { useState, useEffect } from "react"
+import dynamic from "next/dynamic"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts"
+
+const LineChart = dynamic(() => import("recharts").then((mod) => mod.LineChart), { ssr: false })
+const Line = dynamic(() => import("recharts").then((mod) => mod.Line), { ssr: false })
+const XAxis = dynamic(() => import("recharts").then((mod) => mod.XAxis), { ssr: false })
+const YAxis = dynamic(() => import("recharts").then((mod) => mod.YAxis), { ssr: false })
+const CartesianGrid = dynamic(() => import("recharts").then((mod) => mod.CartesianGrid), { ssr: false })
+const Tooltip = dynamic(() => import("recharts").then((mod) => mod.Tooltip), { ssr: false })
+const ResponsiveContainer = dynamic(() => import("recharts").then((mod) => mod.ResponsiveContainer), { ssr: false })
+const Legend = dynamic(() => import("recharts").then((mod) => mod.Legend), { ssr: false })
 
 interface TransactionTrendProps {
   data: {
@@ -12,11 +22,30 @@ interface TransactionTrendProps {
 }
 
 export function TransactionTrend({ data }: TransactionTrendProps) {
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   const formattedData = data.map((item) => ({
     ...item,
     date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
     volume: item.volume / 1000000, // Convert to millions
   }))
+
+  if (!isMounted) {
+    return (
+      <Card className="col-span-2">
+        <CardHeader>
+          <CardTitle>Transaction Trend (30 Days)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] flex items-center justify-center text-muted-foreground">Loading chart...</div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Card className="col-span-2">

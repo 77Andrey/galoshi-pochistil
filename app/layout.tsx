@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { Navigation } from "@/components/navigation"
+import { Providers } from "@/components/providers"
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -28,10 +29,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
-        <div className="flex min-h-screen">
-          <Navigation />
-          <main className="flex-1 overflow-auto">{children}</main>
-        </div>
+        <Providers>
+          <div className="flex min-h-screen">
+            <Navigation />
+            <main className="flex-1 overflow-auto">{children}</main>
+          </div>
+        </Providers>
       </body>
     </html>
   )

@@ -1,31 +1,36 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { mockAuditLogs } from "@/lib/mock-data"
+import { useMockAuditLogs } from "@/lib/mock-data"
 import { SearchIcon, FilterIcon, DownloadIcon, UserIcon, ActivityIcon } from "lucide-react"
 
 export default function AuditPage() {
+  const [logs, setLogs] = useState(useMockAuditLogs())
   const [searchQuery, setSearchQuery] = useState("")
   const [userFilter, setUserFilter] = useState<string>("all")
   const [actionFilter, setActionFilter] = useState<string>("all")
 
-  const users = useMemo(() => {
-    const uniqueUsers = new Set(mockAuditLogs.map((log) => log.user))
-    return Array.from(uniqueUsers).sort()
+  useEffect(() => {
+    setLogs(useMockAuditLogs())
   }, [])
+
+  const users = useMemo(() => {
+    const uniqueUsers = new Set(logs.map((log) => log.user))
+    return Array.from(uniqueUsers).sort()
+  }, [logs])
 
   const actions = useMemo(() => {
-    const uniqueActions = new Set(mockAuditLogs.map((log) => log.action))
+    const uniqueActions = new Set(logs.map((log) => log.action))
     return Array.from(uniqueActions).sort()
-  }, [])
+  }, [logs])
 
   const filteredLogs = useMemo(() => {
-    return mockAuditLogs.filter((log) => {
+    return logs.filter((log) => {
       const matchesSearch =
         searchQuery === "" ||
         log.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -38,7 +43,7 @@ export default function AuditPage() {
 
       return matchesSearch && matchesUser && matchesAction
     })
-  }, [searchQuery, userFilter, actionFilter])
+  }, [logs, searchQuery, userFilter, actionFilter])
 
   const handleExport = () => {
     const csv = [
@@ -71,7 +76,7 @@ export default function AuditPage() {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Total Events</p>
-              <p className="text-2xl font-bold">{mockAuditLogs.length.toLocaleString()}</p>
+              <p className="text-2xl font-bold">{logs.length.toLocaleString()}</p>
             </div>
           </div>
         </Card>
@@ -135,7 +140,7 @@ export default function AuditPage() {
           </div>
         </div>
         <div className="mt-4 text-sm text-muted-foreground">
-          Showing {filteredLogs.length.toLocaleString()} of {mockAuditLogs.length.toLocaleString()} events
+          Showing {filteredLogs.length.toLocaleString()} of {logs.length.toLocaleString()} events
         </div>
       </Card>
 
